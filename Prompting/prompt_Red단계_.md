@@ -1,5 +1,5 @@
 # 테스트 케이스 생성
-_Exported on 12/17/2025 at 09:16:51 GMT+9 from Cursor (2.2.20)_
+_Exported on 12/17/2025 at 09:43:38 GMT+9 from Cursor (2.2.20)_
 
 ---
 
@@ -5174,4 +5174,35 @@ GitHub에 업로드 완료했습니다! ✅
 - 프론트엔드 테스트 (23개 케이스)
 - 테스트 가이드 문서
 - 커버리지 리포트
+
+---
+
+**User**
+
+github에 업로드 해줘
+
+---
+
+**Cursor**
+
+GitHub에 업로드 완료! ✅
+
+**커밋 정보:**
+- 브랜치: `TC`
+- 커밋: "Add prompting documentation"
+- 추가된 파일: `Prompting/prompt_Red단계_.md`
+
+---
+
+**User**
+
+git commit -m "🩷 RED 단계 작업 완료 ~!!!"
+
+---
+
+**Cursor**
+
+완료! 🩷
+
+커밋 메시지가 "🩷 RED 단계 작업 완료 ~!!!"로 변경되어 GitHub에 업로드되었습니다.
 
