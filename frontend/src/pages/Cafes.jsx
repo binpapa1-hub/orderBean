@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
 import toast from 'react-hot-toast'
+import LoadingSpinner from '../components/common/LoadingSpinner'
 
 const Cafes = () => {
   const [cafes, setCafes] = useState([])
@@ -23,11 +24,7 @@ const Cafes = () => {
   }
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-      </div>
-    )
+    return <LoadingSpinner fullScreen />
   }
 
   return (
