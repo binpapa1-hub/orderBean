@@ -8,6 +8,7 @@ const MOCK_MENUS = [
     name: '아메리카노(ICE)',
     price: 4000,
     description: '간단한 설명...',
+    image: 'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?w=300&h=300&fit=crop',
     options: [
       { name: '샷 추가', price: 500 },
       { name: '시럽 추가', price: 0 }
@@ -18,6 +19,7 @@ const MOCK_MENUS = [
     name: '아메리카노(HOT)',
     price: 4000,
     description: '간단한 설명...',
+    image: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=300&h=300&fit=crop',
     options: [
       { name: '샷 추가', price: 500 },
       { name: '시럽 추가', price: 0 }
@@ -28,6 +30,7 @@ const MOCK_MENUS = [
     name: '카페라떼',
     price: 5000,
     description: '간단한 설명...',
+    image: 'https://images.unsplash.com/photo-1534778101976-62847782c213?w=300&h=300&fit=crop',
     options: [
       { name: '샷 추가', price: 500 },
       { name: '시럽 추가', price: 0 }
@@ -98,9 +101,23 @@ const CustomerMenu = () => {
 
   // 주문하기
   const handleOrder = () => {
-    localStorage.setItem('cart', JSON.stringify({ items: cart, totalAmount }))
+    const newOrder = {
+      id: Date.now(),
+      items: cart,
+      totalAmount,
+      status: 'pending',
+      createdAt: new Date().toISOString()
+    }
+    
+    // 기존 주문 내역 불러오기
+    const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]')
+    
+    // 새 주문 추가
+    localStorage.setItem('orders', JSON.stringify([newOrder, ...existingOrders]))
+    
     alert('주문이 완료되었습니다!')
     setCart([])
+    navigate('/orders')
   }
 
   return (
@@ -136,15 +153,23 @@ const CustomerMenu = () => {
               data-testid="menu-card"
               className="bg-white border border-gray-200 p-4"
             >
-              {/* 이미지 placeholder */}
+              {/* 이미지 */}
               <div 
                 data-testid="menu-image-placeholder"
-                className="w-full h-28 bg-gray-50 border border-gray-300 flex items-center justify-center mb-3 relative"
+                className="w-full h-32 bg-gray-100 border border-gray-300 flex items-center justify-center mb-3 overflow-hidden"
               >
-                <svg className="w-full h-full text-gray-300" viewBox="0 0 100 100" preserveAspectRatio="none">
-                  <line x1="0" y1="0" x2="100" y2="100" stroke="currentColor" strokeWidth="1" />
-                  <line x1="100" y1="0" x2="0" y2="100" stroke="currentColor" strokeWidth="1" />
-                </svg>
+                {menu.image ? (
+                  <img 
+                    src={menu.image} 
+                    alt={menu.name}
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <svg className="w-full h-full text-gray-300" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <line x1="0" y1="0" x2="100" y2="100" stroke="currentColor" strokeWidth="1" />
+                    <line x1="100" y1="0" x2="0" y2="100" stroke="currentColor" strokeWidth="1" />
+                  </svg>
+                )}
               </div>
 
               {/* 메뉴명 */}

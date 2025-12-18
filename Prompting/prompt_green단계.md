@@ -1,5 +1,5 @@
 # 기술 스택 기반 PRD 업데이트
-_Exported on 12/17/2025 at 16:46:11 GMT+9 from Cursor (2.2.20)_
+_Exported on 12/18/2025 at 15:06:28 GMT+9 from Cursor (2.2.20)_
 
 ---
 
@@ -8911,4 +8911,598 @@ export default CustomerMenu
 ```
 
 완료했습니다. `object-cover` → `object-contain`으로 변경하여 이미지 전체가 보이도록 수정했습니다. 브라우저를 새로고침하세요.
+
+---
+
+**User**
+
+실행해서 주문하기를 누르면 주문 내역이 없다고 나오는데, 개선 해줘
+
+---
+
+**Cursor**
+
+현재 "주문하기" 버튼을 누르면 기존 Orders 페이지로 이동하는데, 해당 페이지는 API 연동이 필요합니다. 장바구니에서 주문 완료 시 주문 내역을 보여주도록 수정하겠습니다.
+
+Orders 페이지가 API를 호출하고 있어서 백엔드 없이는 작동하지 않습니다. localStorage에서 주문 내역을 읽어오도록 수정하겠습니다.
+
+```javascriptreact
+import { useState, useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+
+const Orders = () => {
+  const navigate = useNavigate()
+  const [orders, setOrders] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    // localStorage에서 주문 내역 불러오기
+    const storedOrders = localStorage.getItem('orders')
+    if (storedOrders) {
+      setOrders(JSON.parse(storedOrders))
+    }
+    setLoading(false)
+  }, [])
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800'
+      case 'confirmed':
+        return 'bg-blue-100 text-blue-800'
+      case 'preparing':
+        return 'bg-purple-100 text-purple-800'
+      case 'ready':
+        return 'bg-green-100 text-green-800'
+      case 'completed':
+        return 'bg-gray-100 text-gray-800'
+      case 'cancelled':
+        return 'bg-red-100 text-red-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
+    }
+  }
+
+  const getStatusText = (status) => {
+    const statusMap = {
+      pending: '주문 접수',
+      confirmed: '확인됨',
+      preparing: '제조 중',
+      ready: '준비 완료',
+      completed: '완료',
+      cancelled: '취소됨'
+    }
+    return statusMap[status] || status
+  }
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600"></div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-white">
+      {/* 헤더 */}
+      <header className="bg-white border-b border-gray-300 flex items-center justify-between px-6 py-4">
+        <div 
+          className="text-xl font-bold text-gray-800 cursor-pointer"
+          onClick={() => navigate('/')}
+        >
+          OrderBean - 커피 주문
+        </div>
+        <div className="flex items-center space-x-4">
+          <span className="text-gray-900 font-medium">주문하기</span>
+          <button 
+            className="px-4 py-2 border border-gray-400 rounded text-gray-700 hover:bg-gray-50"
+            onClick={() => navigate('/admin')}
+          >
+            관리자
+          </button>
+        </div>
+      </header>
+
+      <main className="p-6">
+        <h1 className="text-2xl font-bold mb-6">주문 내역</h1>
+        
+        {orders.length === 0 ? (
+          <div className="text-center py-12 border border-gray-200 rounded">
+            <p className="text-gray-500 mb-4">주문 내역이 없습니다.</p>
+            <button
+              onClick={() => navigate('/')}
+              className="text-blue-600 hover:underline"
+            >
+              메뉴로 돌아가기
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {orders.map((order) => (
+              <div
+                key={order.id}
+                className="bg-white border border-gray-200 rounded-lg p-6"
+              >
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <p className="text-gray-600 text-sm">
+                      {new Date(order.createdAt).toLocaleString('ko-KR')}
+                    </p>
+                  </div>
+                  <span className={`px-3 py-1 rounded-full text-sm ${getStatusColor(order.status)}`}>
+                    {getStatusText(order.status)}
+                  </span>
+                </div>
+                <div className="space-y-2 mb-4">
+                  {order.items.map((item, index) => (
+                    <div key={index} className="flex justify-between text-sm">
+                      <span className="text-gray-700">
+                        {item.menuName}
+                        {item.selectedOptions?.length > 0 && (
+                          <span className="text-gray-500 ml-1">
+                            ({item.selectedOptions.join(', ')})
+                          </span>
+                        )}
+                        <span className="ml-2">x {item.quantity}</span>
+                      </span>
+                      <span className="text-gray-800">{(item.price * item.quantity).toLocaleString()}원</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex justify-end border-t pt-4">
+                  <span className="text-lg font-bold text-gray-900">
+                    총 {order.totalAmount.toLocaleString()}원
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </main>
+    </div>
+  )
+}
+
+export default Orders
+
+```
+
+이제 CustomerMenu에서 주문 시 localStorage에 저장하도록 수정합니다:
+
+```javascriptreact
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+
+// 임의의 커피 메뉴 데이터
+const MOCK_MENUS = [
+  {
+    id: 1,
+    name: '아메리카노(ICE)',
+    price: 4000,
+    description: '간단한 설명...',
+    image: 'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?w=300&h=300&fit=crop',
+    options: [
+      { name: '샷 추가', price: 500 },
+      { name: '시럽 추가', price: 0 }
+    ]
+  },
+  {
+    id: 2,
+    name: '아메리카노(HOT)',
+    price: 4000,
+    description: '간단한 설명...',
+    image: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=300&h=300&fit=crop',
+    options: [
+      { name: '샷 추가', price: 500 },
+      { name: '시럽 추가', price: 0 }
+    ]
+  },
+  {
+    id: 3,
+    name: '카페라떼',
+    price: 5000,
+    description: '간단한 설명...',
+    image: 'https://images.unsplash.com/photo-1534778101976-62847782c213?w=300&h=300&fit=crop',
+    options: [
+      { name: '샷 추가', price: 500 },
+      { name: '시럽 추가', price: 0 }
+    ]
+  }
+]
+
+const CustomerMenu = () => {
+  const navigate = useNavigate()
+  const [cart, setCart] = useState([])
+  const [selectedOptions, setSelectedOptions] = useState({})
+
+  // 옵션 체크박스 변경 핸들러
+  const handleOptionChange = (menuId, optionName, checked) => {
+    setSelectedOptions(prev => {
+      const menuOptions = prev[menuId] || []
+      if (checked) {
+        return { ...prev, [menuId]: [...menuOptions, optionName] }
+      } else {
+        return { ...prev, [menuId]: menuOptions.filter(o => o !== optionName) }
+      }
+    })
+  }
+
+  // 장바구니에 추가 - 같은 메뉴+옵션은 수량 증가
+  const addToCart = (menu) => {
+    const menuSelectedOptions = selectedOptions[menu.id] || []
+    
+    // 옵션 가격 계산
+    const optionPrice = menu.options
+      .filter(opt => menuSelectedOptions.includes(opt.name))
+      .reduce((sum, opt) => sum + opt.price, 0)
+    
+    const itemPrice = menu.price + optionPrice
+    const optionsKey = [...menuSelectedOptions].sort().join(',')
+
+    // 동일한 메뉴+옵션 조합이 있는지 확인
+    const existingItemIndex = cart.findIndex(
+      item => item.menuId === menu.id && 
+      [...item.selectedOptions].sort().join(',') === optionsKey
+    )
+
+    if (existingItemIndex >= 0) {
+      // 수량 증가
+      setCart(prev => prev.map((item, index) => 
+        index === existingItemIndex 
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      ))
+    } else {
+      // 새 아이템 추가
+      const cartItem = {
+        menuId: menu.id,
+        menuName: menu.name,
+        price: itemPrice,
+        quantity: 1,
+        selectedOptions: menuSelectedOptions
+      }
+      setCart(prev => [...prev, cartItem])
+    }
+    
+    // 옵션 초기화
+    setSelectedOptions(prev => ({ ...prev, [menu.id]: [] }))
+  }
+
+  // 총 금액 계산
+  const totalAmount = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
+
+  // 주문하기
+  const handleOrder = () => {
+    const newOrder = {
+      id: Date.now(),
+      items: cart,
+      totalAmount,
+      status: 'pending',
+      createdAt: new Date().toISOString()
+    }
+    
+    // 기존 주문 내역 불러오기
+    const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]')
+    
+    // 새 주문 추가
+    localStorage.setItem('orders', JSON.stringify([newOrder, ...existingOrders]))
+    
+    alert('주문이 완료되었습니다!')
+    setCart([])
+    navigate('/orders')
+  }
+
+  return (
+    <div className="min-h-screen bg-white">
+      {/* 헤더 (Navbar) */}
+      <header 
+        role="banner"
+        className="bg-white border-b border-gray-300 flex items-center justify-between px-6 py-4"
+      >
+        <div className="text-xl font-bold text-gray-800">OrderBean - 커피 주문</div>
+        <div className="flex items-center space-x-4">
+          <span 
+            className="text-gray-600 cursor-pointer hover:text-gray-900"
+            onClick={() => navigate('/orders')}
+          >
+            주문하기
+          </span>
+          <button 
+            className="px-4 py-2 border border-gray-400 rounded text-gray-700 hover:bg-gray-50 transition-colors"
+            onClick={() => navigate('/admin')}
+          >
+            관리자
+          </button>
+        </div>
+      </header>
+
+      {/* 메뉴 목록 */}
+      <main className="p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {MOCK_MENUS.map((menu) => (
+            <div 
+              key={menu.id} 
+              data-testid="menu-card"
+              className="bg-white border border-gray-200 p-4"
+            >
+              {/* 이미지 */}
+              <div 
+                data-testid="menu-image-placeholder"
+                className="w-full h-32 bg-gray-100 border border-gray-300 flex items-center justify-center mb-3 overflow-hidden"
+              >
+                {menu.image ? (
+                  <img 
+                    src={menu.image} 
+                    alt={menu.name}
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <svg className="w-full h-full text-gray-300" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <line x1="0" y1="0" x2="100" y2="100" stroke="currentColor" strokeWidth="1" />
+                    <line x1="100" y1="0" x2="0" y2="100" stroke="currentColor" strokeWidth="1" />
+                  </svg>
+                )}
+              </div>
+
+              {/* 메뉴명 */}
+              <h3 className="text-base font-bold text-gray-900">{menu.name}</h3>
+              
+              {/* 가격 */}
+              <p className="text-sm text-gray-500 mb-2">{menu.price.toLocaleString()}원</p>
+              
+              {/* 설명 */}
+              <p className="text-xs text-gray-400 mb-3">{menu.description}</p>
+
+              {/* 옵션 */}
+              <div className="space-y-1 mb-4">
+                {menu.options.map((option) => (
+                  <label key={option.name} className="flex items-center text-sm text-gray-600 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="mr-2 w-3 h-3"
+                      checked={(selectedOptions[menu.id] || []).includes(option.name)}
+                      onChange={(e) => handleOptionChange(menu.id, option.name, e.target.checked)}
+                    />
+                    <span className="text-gray-500">{option.name} (+{option.price.toLocaleString()}원)</span>
+                  </label>
+                ))}
+              </div>
+
+              {/* 담기 버튼 */}
+              <button
+                onClick={() => addToCart(menu)}
+                className="px-6 py-1.5 border border-gray-400 rounded text-gray-700 hover:bg-gray-50 text-sm"
+              >
+                담기
+              </button>
+            </div>
+          ))}
+        </div>
+      </main>
+
+      {/* 장바구니 영역 - 2분할 레이아웃 */}
+      {cart.length > 0 && (
+        <section 
+          data-testid="cart-section"
+          className="bg-white border border-gray-200 mx-6 mb-6 p-6"
+        >
+          <h2 className="text-base font-bold text-gray-900 mb-4">장바구니</h2>
+          
+          <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-6">
+            {/* 왼쪽: 주문 내역 */}
+            <div className="flex-1">
+              <table className="w-full text-sm">
+                <tbody>
+                  {cart.map((item, index) => (
+                    <tr key={index} className="border-b border-gray-100 last:border-0">
+                      <td className="py-2 text-gray-800">
+                        {item.menuName}
+                        {item.selectedOptions.length > 0 && (
+                          <span className="text-gray-500 ml-1">
+                            ({item.selectedOptions.join(', ')})
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-2 text-gray-600 text-center w-16">
+                        X {item.quantity}
+                      </td>
+                      <td className="py-2 text-gray-800 text-right w-24">
+                        {(item.price * item.quantity).toLocaleString()}원
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* 오른쪽: 총 금액 + 주문하기 버튼 */}
+            <div className="flex flex-col items-end space-y-4 md:border-l md:border-gray-200 md:pl-6">
+              <div className="flex items-center space-x-3">
+                <span className="text-gray-600">총 금액</span>
+                <span className="text-xl font-bold text-gray-900">{totalAmount.toLocaleString()}원</span>
+              </div>
+              <button
+                onClick={handleOrder}
+                className="px-8 py-2 border border-gray-400 rounded text-gray-700 hover:bg-gray-50"
+              >
+                주문하기
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
+    </div>
+  )
+}
+
+export default CustomerMenu
+
+```
+
+완료했습니다. 이제:
+
+1. 장바구니에서 **주문하기** 클릭 → localStorage에 주문 저장
+2. **주문 내역** 페이지에서 저장된 주문 표시
+
+브라우저를 새로고침하고, 메뉴를 담은 후 주문하기를 눌러보세요.
+
+---
+
+**User**
+
+이화면에서 주문하기를 누르면 커피가 다시 주문화면으로 가야하는데, 실행되지 않으니 개선해줘
+
+---
+
+**Cursor**
+
+```javascriptreact
+import { useState, useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+
+const Orders = () => {
+  const navigate = useNavigate()
+  const [orders, setOrders] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    // localStorage에서 주문 내역 불러오기
+    const storedOrders = localStorage.getItem('orders')
+    if (storedOrders) {
+      setOrders(JSON.parse(storedOrders))
+    }
+    setLoading(false)
+  }, [])
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800'
+      case 'confirmed':
+        return 'bg-blue-100 text-blue-800'
+      case 'preparing':
+        return 'bg-purple-100 text-purple-800'
+      case 'ready':
+        return 'bg-green-100 text-green-800'
+      case 'completed':
+        return 'bg-gray-100 text-gray-800'
+      case 'cancelled':
+        return 'bg-red-100 text-red-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
+    }
+  }
+
+  const getStatusText = (status) => {
+    const statusMap = {
+      pending: '주문 접수',
+      confirmed: '확인됨',
+      preparing: '제조 중',
+      ready: '준비 완료',
+      completed: '완료',
+      cancelled: '취소됨'
+    }
+    return statusMap[status] || status
+  }
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600"></div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-white">
+      {/* 헤더 */}
+      <header className="bg-white border-b border-gray-300 flex items-center justify-between px-6 py-4">
+        <div 
+          className="text-xl font-bold text-gray-800 cursor-pointer"
+          onClick={() => navigate('/')}
+        >
+          OrderBean - 커피 주문
+        </div>
+        <div className="flex items-center space-x-4">
+          <span 
+            className="text-gray-600 cursor-pointer hover:text-gray-900"
+            onClick={() => navigate('/')}
+          >
+            주문하기
+          </span>
+          <button 
+            className="px-4 py-2 border border-gray-400 rounded text-gray-700 hover:bg-gray-50"
+            onClick={() => navigate('/admin')}
+          >
+            관리자
+          </button>
+        </div>
+      </header>
+
+      <main className="p-6">
+        <h1 className="text-2xl font-bold mb-6">주문 내역</h1>
+        
+        {orders.length === 0 ? (
+          <div className="text-center py-12 border border-gray-200 rounded">
+            <p className="text-gray-500 mb-4">주문 내역이 없습니다.</p>
+            <button
+              onClick={() => navigate('/')}
+              className="text-blue-600 hover:underline"
+            >
+              메뉴로 돌아가기
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {orders.map((order) => (
+              <div
+                key={order.id}
+                className="bg-white border border-gray-200 rounded-lg p-6"
+              >
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <p className="text-gray-600 text-sm">
+                      {new Date(order.createdAt).toLocaleString('ko-KR')}
+                    </p>
+                  </div>
+                  <span className={`px-3 py-1 rounded-full text-sm ${getStatusColor(order.status)}`}>
+                    {getStatusText(order.status)}
+                  </span>
+                </div>
+                <div className="space-y-2 mb-4">
+                  {order.items.map((item, index) => (
+                    <div key={index} className="flex justify-between text-sm">
+                      <span className="text-gray-700">
+                        {item.menuName}
+                        {item.selectedOptions?.length > 0 && (
+                          <span className="text-gray-500 ml-1">
+                            ({item.selectedOptions.join(', ')})
+                          </span>
+                        )}
+                        <span className="ml-2">x {item.quantity}</span>
+                      </span>
+                      <span className="text-gray-800">{(item.price * item.quantity).toLocaleString()}원</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex justify-end border-t pt-4">
+                  <span className="text-lg font-bold text-gray-900">
+                    총 {order.totalAmount.toLocaleString()}원
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </main>
+    </div>
+  )
+}
+
+export default Orders
+
+```
+
+완료했습니다. "주문하기" 클릭 시 메뉴 화면으로 이동합니다. 브라우저를 새로고침하세요.
 
