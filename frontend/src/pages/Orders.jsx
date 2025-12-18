@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { getStatusColor, getStatusText } from '../utils/orderUtils'
+import Header from '../components/common/Header'
+import LoadingSpinner from '../components/common/LoadingSpinner'
 
 const Orders = () => {
   const navigate = useNavigate()
@@ -15,70 +18,18 @@ const Orders = () => {
     setLoading(false)
   }, [])
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800'
-      case 'confirmed':
-        return 'bg-blue-100 text-blue-800'
-      case 'preparing':
-        return 'bg-purple-100 text-purple-800'
-      case 'ready':
-        return 'bg-green-100 text-green-800'
-      case 'completed':
-        return 'bg-gray-100 text-gray-800'
-      case 'cancelled':
-        return 'bg-red-100 text-red-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
-    }
-  }
-
-  const getStatusText = (status) => {
-    const statusMap = {
-      pending: '주문 접수',
-      confirmed: '확인됨',
-      preparing: '제조 중',
-      ready: '준비 완료',
-      completed: '완료',
-      cancelled: '취소됨'
-    }
-    return statusMap[status] || status
-  }
-
   if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600"></div>
-      </div>
-    )
+    return <LoadingSpinner color="gray" fullScreen />
   }
 
   return (
     <div className="min-h-screen bg-white">
-      {/* 헤더 */}
-      <header className="bg-white border-b border-gray-300 flex items-center justify-between px-6 py-4">
-        <div 
-          className="text-xl font-bold text-gray-800 cursor-pointer"
-          onClick={() => navigate('/')}
-        >
-          OrderBean - 커피 주문
-        </div>
-        <div className="flex items-center space-x-4">
-          <span 
-            className="text-gray-600 cursor-pointer hover:text-gray-900"
-            onClick={() => navigate('/')}
-          >
-            주문하기
-          </span>
-          <button 
-            className="px-4 py-2 border border-gray-400 rounded text-gray-700 hover:bg-gray-50"
-            onClick={() => navigate('/admin')}
-          >
-            관리자
-          </button>
-        </div>
-      </header>
+      <Header 
+        variant="simple"
+        showAuth={false}
+        showAdmin={true}
+        showOrders={true}
+      />
 
       <main className="p-6">
         <h1 className="text-2xl font-bold mb-6">주문 내역</h1>

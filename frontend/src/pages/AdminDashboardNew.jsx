@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { getStatusButtonText, getNextStatus, ORDER_STATUS } from '../utils/orderUtils'
+import Header from '../components/common/Header'
 
 // Mock 데이터 - PRD 기준
 const INITIAL_INVENTORY = [
@@ -14,7 +16,7 @@ const INITIAL_ORDERS = [
     createdAt: '2025-07-31T13:00:00Z',
     items: [{ menuName: '아메리카노(ICE)', quantity: 1 }],
     totalAmount: 4000,
-    status: 'pending'
+    status: ORDER_STATUS.PENDING
   }
 ]
 
@@ -26,9 +28,9 @@ const AdminDashboardNew = () => {
   // 통계 계산
   const stats = {
     totalOrders: orders.length,
-    pendingOrders: orders.filter(o => o.status === 'pending' || o.status === 'confirmed').length,
-    preparingOrders: orders.filter(o => o.status === 'preparing').length,
-    completedOrders: orders.filter(o => o.status === 'ready' || o.status === 'completed').length
+    pendingOrders: orders.filter(o => o.status === ORDER_STATUS.PENDING || o.status === ORDER_STATUS.CONFIRMED).length,
+    preparingOrders: orders.filter(o => o.status === ORDER_STATUS.PREPARING).length,
+    completedOrders: orders.filter(o => o.status === ORDER_STATUS.READY || o.status === ORDER_STATUS.COMPLETED).length
   }
 
   // 재고 증가
@@ -57,28 +59,11 @@ const AdminDashboardNew = () => {
     setOrders(prev => prev.map(order => {
       if (order.id !== orderId) return order
       
-      const statusFlow = {
-        'pending': 'confirmed',
-        'confirmed': 'preparing',
-        'preparing': 'ready',
-        'ready': 'completed'
-      }
+      const nextStatus = getNextStatus(order.status)
+      if (!nextStatus) return order // 전이 불가능한 상태
       
-      return { ...order, status: statusFlow[order.status] || order.status }
+      return { ...order, status: nextStatus }
     }))
-  }
-
-  // 상태 버튼 텍스트
-  const getStatusButtonText = (status) => {
-    const texts = {
-      'pending': '주문 접수',
-      'confirmed': '제조 시작',
-      'preparing': '제조 중',
-      'ready': '제조 완료',
-      'completed': '완료',
-      'cancelled': '취소됨'
-    }
-    return texts[status] || status
   }
 
   // 날짜 포맷
@@ -93,26 +78,12 @@ const AdminDashboardNew = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* 헤더 (Navbar) - PRD 기준 */}
-      <header 
-        role="banner"
-        className="bg-white border-b border-gray-300 flex items-center justify-between px-6 py-4"
-      >
-        <div className="text-xl font-bold text-gray-800">OrderBean - 커피 주문</div>
-        <div className="flex items-center space-x-4">
-          <span 
-            className="text-gray-600 cursor-pointer hover:text-gray-900"
-            onClick={() => navigate('/')}
-          >
-            주문하기
-          </span>
-          <button 
-            className="px-4 py-2 border border-gray-400 rounded text-gray-700 bg-gray-50"
-          >
-            관리자
-          </button>
-        </div>
-      </header>
+      <Header 
+        variant="simple"
+        showAuth={false}
+        showAdmin={true}
+        showOrders={true}
+      />
 
       <main className="p-6 space-y-6">
         {/* 관리자 대시보드 섹션 - PRD 기준: 4개 항목 */}
@@ -179,9 +150,9 @@ const AdminDashboardNew = () => {
                 </div>
                 <button
                   onClick={() => handleStatusChange(order.id)}
-                  disabled={order.status === 'completed' || order.status === 'cancelled'}
+                  disabled={order.status === ORDER_STATUS.COMPLETED || order.status === ORDER_STATUS.CANCELLED}
                   className={`px-4 py-1.5 border rounded text-sm ${
-                    order.status === 'completed' || order.status === 'cancelled'
+                    order.status === ORDER_STATUS.COMPLETED || order.status === ORDER_STATUS.CANCELLED
                       ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
                       : 'border-gray-400 text-gray-700 hover:bg-gray-50'
                   }`}

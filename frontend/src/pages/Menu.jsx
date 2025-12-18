@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import toast from 'react-hot-toast'
 import { useAuth } from '../contexts/AuthContext'
+import LoadingSpinner from '../components/common/LoadingSpinner'
 
 const Menu = () => {
   const { cafeId } = useParams()
@@ -73,11 +74,7 @@ const Menu = () => {
     : menus.filter(menu => menu.category === selectedCategory)
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-      </div>
-    )
+    return <LoadingSpinner fullScreen />
   }
 
   return (

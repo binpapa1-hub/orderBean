@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import Header from '../components/common/Header'
 
 // 임의의 커피 메뉴 데이터
 const MOCK_MENUS = [
@@ -122,27 +123,12 @@ const CustomerMenu = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* 헤더 (Navbar) */}
-      <header 
-        role="banner"
-        className="bg-white border-b border-gray-300 flex items-center justify-between px-6 py-4"
-      >
-        <div className="text-xl font-bold text-gray-800">OrderBean - 커피 주문</div>
-        <div className="flex items-center space-x-4">
-          <span 
-            className="text-gray-600 cursor-pointer hover:text-gray-900"
-            onClick={() => navigate('/orders')}
-          >
-            주문하기
-          </span>
-          <button 
-            className="px-4 py-2 border border-gray-400 rounded text-gray-700 hover:bg-gray-50 transition-colors"
-            onClick={() => navigate('/admin')}
-          >
-            관리자
-          </button>
-        </div>
-      </header>
+      <Header 
+        variant="simple"
+        showAuth={false}
+        showAdmin={true}
+        showOrders={true}
+      />
 
       {/* 메뉴 목록 */}
       <main className="p-6">

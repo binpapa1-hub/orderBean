@@ -168,7 +168,205 @@ Toy Project - 개인/소규모 팀 개발용
 
 ## To-Do List
 
--TC
--Implementation
--Refactoring
+### TC (Test Cases)
+- [ ] 테스트 케이스 작성 및 커버리지 향상
+
+### Implementation
+- [ ] 추가 기능 구현
+
+### Refactoring
+
+상세한 리팩토링 분석은 [frontend/REFACTORING_ANALYSIS.md](./frontend/REFACTORING_ANALYSIS.md)를 참고하세요.
+
+#### Phase 1: 긴급 (즉시 개선) 🔴
+
+- [ ] **중복 코드 제거** 
+  
+  > 📖 상세 리팩토링 계획: [frontend/REFACTORING_PLAN_ORDER_STATUS.md](./frontend/REFACTORING_PLAN_ORDER_STATUS.md)
+  
+  **Phase 1: 상수 정의 및 타입 안정성 확보**
+  - [ ] `src/constants/orderStatus.js` 생성
+    - [ ] `ORDER_STATUS` 상수 정의 (Magic Strings 제거)
+    - [ ] `ORDER_STATUS_TEXT` 매핑 정의 (일관된 텍스트)
+    - [ ] `ORDER_STATUS_COLORS` 매핑 정의 (Tailwind CSS 클래스)
+    - [ ] `ORDER_STATUS_FLOW` 정의 (상태 전이 로직)
+    - [ ] `isValidOrderStatus()` 유효성 검사 함수
+    - [ ] `getOrderStatusText()`, `getOrderStatusColor()` 함수
+    - [ ] `getNextStatus()`, `canTransitionToNext()` 함수
+  
+  **Phase 2: 유틸리티 함수 통합**
+  - [ ] `src/utils/orderUtils.js` 생성
+    - [ ] `getStatusText()`, `getStatusColor()` 함수 통합 (별칭)
+    - [ ] `getStatusInfo()` 함수 추가 (통합 정보 객체)
+    - [ ] `getStatusButtonText()` 함수 통합 (관리자용)
+    - [ ] 상수 재내보내기
+  
+  **Phase 3: 컴포넌트 리팩토링**
+  - [ ] `Orders.jsx` 리팩토링
+    - [ ] 중복 함수 제거 (`getStatusColor`, `getStatusText`)
+    - [ ] `orderUtils`에서 import
+  - [ ] `OrderDetail.jsx` 리팩토링
+    - [ ] 중복 함수 제거
+    - [ ] `canCancel` 로직을 `getStatusInfo()` 사용으로 개선
+    - [ ] '제작 중' → '제조 중' 텍스트 통일
+  - [ ] `AdminDashboard.jsx` 리팩토링
+    - [ ] `getStatusColor` 함수 제거
+  - [ ] `AdminDashboardNew.jsx` 리팩토링
+    - [ ] `statusFlow` 객체 제거, `getNextStatus()` 사용
+    - [ ] `getStatusButtonText` 함수 제거
+  
+  **Phase 4: 테스트 작성**
+  - [ ] `src/constants/__tests__/orderStatus.test.js` 작성
+  - [ ] `src/utils/__tests__/orderUtils.test.js` 작성
+  - [ ] 테스트 커버리지 80% 이상 달성
+  
+  **Phase 5: 문서화 및 검증**
+  - [ ] JSDoc 주석 추가
+  - [ ] 통합 테스트 완료
+  - [ ] 코드 리뷰 완료
+  
+  **코드 스멜 해결**:
+  - ✅ Magic Strings 제거
+  - ✅ DRY 원칙 준수
+  - ✅ 일관성 확보
+  
+  **SOLID 원칙 적용**:
+  - ✅ SRP: 상태 로직을 별도 모듈로 분리
+  - ✅ OCP: 새로운 상태 추가 시 상수 파일만 수정
+  - ✅ DIP: 컴포넌트는 추상화(상수)에 의존
+
+- [ ] **헤더 컴포넌트 통합**
+  
+  > 📖 상세 리팩토링 계획: [frontend/REFACTORING_PLAN_HEADER.md](./frontend/REFACTORING_PLAN_HEADER.md)
+  
+  **Phase 1: 헤더 컴포넌트 설계 및 분석**
+  - [ ] 현재 헤더 구조 분석
+    - [ ] `CustomerMenu.jsx` 헤더 분석
+    - [ ] `AdminDashboardNew.jsx` 헤더 분석
+    - [ ] `Orders.jsx` 헤더 분석
+    - [ ] `Navbar.jsx` 분석
+  - [ ] 통합 헤더 설계
+    - [ ] 헤더 variants 정의 (`default` | `simple`)
+    - [ ] Props 인터페이스 설계
+    - [ ] 기본값 정의
+  
+  **Phase 2: 통합 헤더 컴포넌트 생성**
+  - [ ] `src/components/common/Header.jsx` 생성
+    - [ ] 기존 Navbar 기능 통합
+    - [ ] 접근성 개선 (`<span onClick>` → `<Link>` 또는 `<button>`)
+    - [ ] ARIA 속성 추가 (`role`, `aria-label`)
+    - [ ] 스타일 변형 지원 (`variant` prop)
+    - [ ] Props 타입 정의 (JSDoc)
+  - [ ] Header 컴포넌트 최적화
+    - [ ] `useMemo`로 스타일 클래스 메모이제이션
+    - [ ] 조건부 렌더링 최적화
+  
+  **Phase 3: 기존 컴포넌트 리팩토링**
+  - [ ] `CustomerMenu.jsx` 리팩토링
+    - [ ] Header import 추가
+    - [ ] 중복 헤더 코드 제거 (126-145줄)
+    - [ ] Header 컴포넌트로 교체
+  - [ ] `AdminDashboardNew.jsx` 리팩토링
+    - [ ] Header import 추가
+    - [ ] 중복 헤더 코드 제거 (80-99줄)
+    - [ ] Header 컴포넌트로 교체
+  - [ ] `Orders.jsx` 리팩토링
+    - [ ] Header import 추가
+    - [ ] 중복 헤더 코드 제거 (59-81줄)
+    - [ ] Header 컴포넌트로 교체
+  - [ ] `App.jsx` 업데이트 (선택사항)
+    - [ ] 전역 헤더 적용 검토
+  
+  **Phase 4: 기존 Navbar 처리**
+  - [ ] Navbar.jsx 처리 방식 결정
+    - [ ] Navbar.jsx를 Header로 리팩토링하거나 제거
+    - [ ] Navbar를 사용하는 다른 파일 확인 및 업데이트
+  
+  **Phase 5: 테스트 작성**
+  - [ ] `src/components/common/__tests__/Header.test.jsx` 작성
+    - [ ] 기본 렌더링 테스트
+    - [ ] variant 테스트
+    - [ ] props 테스트 (showAuth, showAdmin, showOrders)
+    - [ ] 접근성 테스트
+    - [ ] 인증 상태별 테스트
+  - [ ] 테스트 커버리지 80% 이상 달성
+  
+  **Phase 6: 문서화 및 검증**
+  - [ ] JSDoc 주석 추가
+  - [ ] 통합 테스트 완료
+  - [ ] 코드 리뷰 완료
+  
+  **코드 스멜 해결**:
+  - ✅ 중복 코드 제거
+  - ✅ 접근성 개선 (키보드 네비게이션)
+  - ✅ 일관성 확보 (통일된 헤더 스타일)
+  
+  **SOLID 원칙 적용**:
+  - ✅ SRP: 헤더 로직을 별도 컴포넌트로 분리
+  - ✅ OCP: Props를 통한 확장 가능한 구조
+  - ✅ DIP: 컴포넌트는 추상화(Props)에 의존
+
+- [ ] **로딩 스피너 컴포넌트화**
+  - [ ] `src/components/common/LoadingSpinner.jsx` 생성
+  - [ ] 모든 페이지에서 공통 컴포넌트 사용
+
+- [ ] **localStorage 추상화**
+  - [ ] `src/hooks/useLocalStorage.js` 커스텀 훅 생성
+  - [ ] 에러 처리 및 타입 안정성 추가
+  - [ ] `CustomerMenu.jsx`, `Orders.jsx`, `Cart.jsx`에서 적용
+
+#### Phase 2: 중요 (단기) 🟡
+
+- [ ] **장바구니 전역 상태 관리**
+  - [ ] `src/contexts/CartContext.jsx` 생성
+  - [ ] `CustomerMenu.jsx`, `Menu.jsx`, `Cart.jsx`에서 전역 상태 사용
+  - [ ] 상태 동기화 문제 해결
+
+- [ ] **API 설정 중앙화**
+  - [ ] `src/config/api.js` 생성 - API 베이스 URL 설정
+  - [ ] axios instance 생성 및 인터셉터 설정
+  - [ ] 환경 변수 지원 (개발/프로덕션)
+
+- [ ] **컴포넌트 분리**
+  - [ ] `CustomerMenu.jsx` 분리:
+    - [ ] `src/components/menu/MenuCard.jsx` 생성
+    - [ ] `src/components/menu/MenuOption.jsx` 생성
+    - [ ] `src/components/cart/CartSection.jsx` 생성
+    - [ ] `src/components/cart/OrderSummary.jsx` 생성
+  - [ ] `AdminDashboardNew.jsx` 분리:
+    - [ ] `src/components/admin/InventoryCard.jsx` 생성
+    - [ ] `src/components/admin/OrderCard.jsx` 생성
+    - [ ] `src/components/order/StatusBadge.jsx` 생성
+
+- [ ] **에러 처리 통일**
+  - [ ] 모든 `alert()` 호출을 `react-hot-toast`로 변경
+  - [ ] `src/components/common/ErrorBoundary.jsx` 생성
+  - [ ] 일관된 에러 처리 패턴 적용
+
+#### Phase 3: 개선 (중기) 🟢
+
+- [ ] **타입 안정성**
+  - [ ] TypeScript 도입 검토 또는 PropTypes 추가
+  - [ ] 주요 컴포넌트에 타입 정의
+
+- [ ] **접근성 개선**
+  - [ ] `<span onClick>` → `<button>` 또는 `<Link>` 변경
+  - [ ] ARIA 속성 추가 (`role`, `aria-label`)
+  - [ ] 키보드 네비게이션 지원
+
+- [ ] **성능 최적화**
+  - [ ] `useMemo`로 계산값 메모이제이션 (`totalAmount` 등)
+  - [ ] 이미지 lazy loading 적용
+  - [ ] 불필요한 리렌더링 최소화
+
+- [ ] **테스트 커버리지 향상**
+  - [ ] `CustomerMenu.test.jsx` 작성
+  - [ ] `AdminDashboardNew.test.jsx` 작성
+  - [ ] 유틸리티 함수 테스트 작성
+
+- [ ] **코드 품질 개선**
+  - [ ] `clsx` 또는 `classnames` 라이브러리 추가
+  - [ ] 복잡한 조건부 클래스명 정리
+  - [ ] JSDoc 주석 추가
+  - [ ] 네이밍 일관성 개선 (`AdminDashboardNew` → `AdminDashboard`)
 

@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import toast from 'react-hot-toast'
+import { getStatusColor, getStatusText, ORDER_STATUS, ORDER_STATUS_LIST } from '../utils/orderUtils'
+import LoadingSpinner from '../components/common/LoadingSpinner'
 
 const AdminDashboard = () => {
   const [orders, setOrders] = useState([])
@@ -42,31 +44,8 @@ const AdminDashboard = () => {
     }
   }
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800'
-      case 'confirmed':
-        return 'bg-blue-100 text-blue-800'
-      case 'preparing':
-        return 'bg-purple-100 text-purple-800'
-      case 'ready':
-        return 'bg-green-100 text-green-800'
-      case 'completed':
-        return 'bg-gray-100 text-gray-800'
-      case 'cancelled':
-        return 'bg-red-100 text-red-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
-    }
-  }
-
   if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-      </div>
-    )
+    return <LoadingSpinner fullScreen />
   }
 
   return (
@@ -88,7 +67,7 @@ const AdminDashboard = () => {
           <div className="bg-white rounded-lg shadow-md p-6">
             <h3 className="text-gray-600 mb-2">대기 중인 주문</h3>
             <p className="text-3xl font-bold text-primary-600">
-              {orders.filter(o => o.status === 'pending' || o.status === 'confirmed').length}
+              {orders.filter(o => o.status === ORDER_STATUS.PENDING || o.status === ORDER_STATUS.CONFIRMED).length}
             </p>
           </div>
         </div>
@@ -117,7 +96,7 @@ const AdminDashboard = () => {
                   <td className="py-2">{order.totalAmount.toLocaleString()}원</td>
                   <td className="py-2">
                     <span className={`px-2 py-1 rounded text-xs ${getStatusColor(order.status)}`}>
-                      {order.status}
+                      {getStatusText(order.status)}
                     </span>
                   </td>
                   <td className="py-2">
@@ -126,12 +105,11 @@ const AdminDashboard = () => {
                       onChange={(e) => updateOrderStatus(order._id, e.target.value)}
                       className="text-sm border rounded px-2 py-1"
                     >
-                      <option value="pending">pending</option>
-                      <option value="confirmed">confirmed</option>
-                      <option value="preparing">preparing</option>
-                      <option value="ready">ready</option>
-                      <option value="completed">completed</option>
-                      <option value="cancelled">cancelled</option>
+                      {ORDER_STATUS_LIST.map((status) => (
+                        <option key={status} value={status}>
+                          {getStatusText(status)}
+                        </option>
+                      ))}
                     </select>
                   </td>
                 </tr>
