@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import toast from 'react-hot-toast'
+import { getStatusColor, getStatusText, getStatusInfo } from '../utils/orderUtils'
 
 const OrderDetail = () => {
   const { orderId } = useParams()
@@ -37,37 +38,6 @@ const OrderDetail = () => {
     }
   }
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800'
-      case 'confirmed':
-        return 'bg-blue-100 text-blue-800'
-      case 'preparing':
-        return 'bg-purple-100 text-purple-800'
-      case 'ready':
-        return 'bg-green-100 text-green-800'
-      case 'completed':
-        return 'bg-gray-100 text-gray-800'
-      case 'cancelled':
-        return 'bg-red-100 text-red-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
-    }
-  }
-
-  const getStatusText = (status) => {
-    const statusMap = {
-      pending: '대기 중',
-      confirmed: '확인됨',
-      preparing: '제작 중',
-      ready: '준비 완료',
-      completed: '완료',
-      cancelled: '취소됨'
-    }
-    return statusMap[status] || status
-  }
-
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -80,7 +50,8 @@ const OrderDetail = () => {
     return null
   }
 
-  const canCancel = order.status === 'pending' || order.status === 'confirmed'
+  const statusInfo = getStatusInfo(order.status)
+  const canCancel = statusInfo.canCancel
 
   return (
     <div className="max-w-2xl mx-auto">
