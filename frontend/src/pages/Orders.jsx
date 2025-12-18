@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { getStatusColor, getStatusText } from '../utils/orderUtils'
 import Header from '../components/common/Header'
+import LoadingSpinner from '../components/common/LoadingSpinner'
 
 const Orders = () => {
   const navigate = useNavigate()
@@ -18,11 +19,7 @@ const Orders = () => {
   }, [])
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600"></div>
-      </div>
-    )
+    return <LoadingSpinner color="gray" fullScreen />
   }
 
   return (

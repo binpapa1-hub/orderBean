@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import toast from 'react-hot-toast'
 import { getStatusColor, getStatusText, getStatusInfo } from '../utils/orderUtils'
+import LoadingSpinner from '../components/common/LoadingSpinner'
 
 const OrderDetail = () => {
   const { orderId } = useParams()
@@ -39,11 +40,7 @@ const OrderDetail = () => {
   }
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-      </div>
-    )
+    return <LoadingSpinner fullScreen />
   }
 
   if (!order) {
