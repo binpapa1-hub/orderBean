@@ -236,8 +236,75 @@ Toy Project - 개인/소규모 팀 개발용
   - ✅ DIP: 컴포넌트는 추상화(상수)에 의존
 
 - [ ] **헤더 컴포넌트 통합**
-  - [ ] `src/components/common/Header.jsx` 생성 또는 기존 `Navbar.jsx` 활용
-  - [ ] `CustomerMenu.jsx`, `AdminDashboardNew.jsx`, `Orders.jsx`에서 중복 헤더 제거
+  
+  > 📖 상세 리팩토링 계획: [frontend/REFACTORING_PLAN_HEADER.md](./frontend/REFACTORING_PLAN_HEADER.md)
+  
+  **Phase 1: 헤더 컴포넌트 설계 및 분석**
+  - [ ] 현재 헤더 구조 분석
+    - [ ] `CustomerMenu.jsx` 헤더 분석
+    - [ ] `AdminDashboardNew.jsx` 헤더 분석
+    - [ ] `Orders.jsx` 헤더 분석
+    - [ ] `Navbar.jsx` 분석
+  - [ ] 통합 헤더 설계
+    - [ ] 헤더 variants 정의 (`default` | `simple`)
+    - [ ] Props 인터페이스 설계
+    - [ ] 기본값 정의
+  
+  **Phase 2: 통합 헤더 컴포넌트 생성**
+  - [ ] `src/components/common/Header.jsx` 생성
+    - [ ] 기존 Navbar 기능 통합
+    - [ ] 접근성 개선 (`<span onClick>` → `<Link>` 또는 `<button>`)
+    - [ ] ARIA 속성 추가 (`role`, `aria-label`)
+    - [ ] 스타일 변형 지원 (`variant` prop)
+    - [ ] Props 타입 정의 (JSDoc)
+  - [ ] Header 컴포넌트 최적화
+    - [ ] `useMemo`로 스타일 클래스 메모이제이션
+    - [ ] 조건부 렌더링 최적화
+  
+  **Phase 3: 기존 컴포넌트 리팩토링**
+  - [ ] `CustomerMenu.jsx` 리팩토링
+    - [ ] Header import 추가
+    - [ ] 중복 헤더 코드 제거 (126-145줄)
+    - [ ] Header 컴포넌트로 교체
+  - [ ] `AdminDashboardNew.jsx` 리팩토링
+    - [ ] Header import 추가
+    - [ ] 중복 헤더 코드 제거 (80-99줄)
+    - [ ] Header 컴포넌트로 교체
+  - [ ] `Orders.jsx` 리팩토링
+    - [ ] Header import 추가
+    - [ ] 중복 헤더 코드 제거 (59-81줄)
+    - [ ] Header 컴포넌트로 교체
+  - [ ] `App.jsx` 업데이트 (선택사항)
+    - [ ] 전역 헤더 적용 검토
+  
+  **Phase 4: 기존 Navbar 처리**
+  - [ ] Navbar.jsx 처리 방식 결정
+    - [ ] Navbar.jsx를 Header로 리팩토링하거나 제거
+    - [ ] Navbar를 사용하는 다른 파일 확인 및 업데이트
+  
+  **Phase 5: 테스트 작성**
+  - [ ] `src/components/common/__tests__/Header.test.jsx` 작성
+    - [ ] 기본 렌더링 테스트
+    - [ ] variant 테스트
+    - [ ] props 테스트 (showAuth, showAdmin, showOrders)
+    - [ ] 접근성 테스트
+    - [ ] 인증 상태별 테스트
+  - [ ] 테스트 커버리지 80% 이상 달성
+  
+  **Phase 6: 문서화 및 검증**
+  - [ ] JSDoc 주석 추가
+  - [ ] 통합 테스트 완료
+  - [ ] 코드 리뷰 완료
+  
+  **코드 스멜 해결**:
+  - ✅ 중복 코드 제거
+  - ✅ 접근성 개선 (키보드 네비게이션)
+  - ✅ 일관성 확보 (통일된 헤더 스타일)
+  
+  **SOLID 원칙 적용**:
+  - ✅ SRP: 헤더 로직을 별도 컴포넌트로 분리
+  - ✅ OCP: Props를 통한 확장 가능한 구조
+  - ✅ DIP: 컴포넌트는 추상화(Props)에 의존
 
 - [ ] **로딩 스피너 컴포넌트화**
   - [ ] `src/components/common/LoadingSpinner.jsx` 생성

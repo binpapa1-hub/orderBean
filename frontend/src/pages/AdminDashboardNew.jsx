@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getStatusButtonText, getNextStatus, ORDER_STATUS } from '../utils/orderUtils'
+import Header from '../components/common/Header'
 
 // Mock 데이터 - PRD 기준
 const INITIAL_INVENTORY = [
@@ -77,26 +78,12 @@ const AdminDashboardNew = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* 헤더 (Navbar) - PRD 기준 */}
-      <header 
-        role="banner"
-        className="bg-white border-b border-gray-300 flex items-center justify-between px-6 py-4"
-      >
-        <div className="text-xl font-bold text-gray-800">OrderBean - 커피 주문</div>
-        <div className="flex items-center space-x-4">
-          <span 
-            className="text-gray-600 cursor-pointer hover:text-gray-900"
-            onClick={() => navigate('/')}
-          >
-            주문하기
-          </span>
-          <button 
-            className="px-4 py-2 border border-gray-400 rounded text-gray-700 bg-gray-50"
-          >
-            관리자
-          </button>
-        </div>
-      </header>
+      <Header 
+        variant="simple"
+        showAuth={false}
+        showAdmin={true}
+        showOrders={true}
+      />
 
       <main className="p-6 space-y-6">
         {/* 관리자 대시보드 섹션 - PRD 기준: 4개 항목 */}

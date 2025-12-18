@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { getStatusColor, getStatusText } from '../utils/orderUtils'
+import Header from '../components/common/Header'
 
 const Orders = () => {
   const navigate = useNavigate()
@@ -26,29 +27,12 @@ const Orders = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* 헤더 */}
-      <header className="bg-white border-b border-gray-300 flex items-center justify-between px-6 py-4">
-        <div 
-          className="text-xl font-bold text-gray-800 cursor-pointer"
-          onClick={() => navigate('/')}
-        >
-          OrderBean - 커피 주문
-        </div>
-        <div className="flex items-center space-x-4">
-          <span 
-            className="text-gray-600 cursor-pointer hover:text-gray-900"
-            onClick={() => navigate('/')}
-          >
-            주문하기
-          </span>
-          <button 
-            className="px-4 py-2 border border-gray-400 rounded text-gray-700 hover:bg-gray-50"
-            onClick={() => navigate('/admin')}
-          >
-            관리자
-          </button>
-        </div>
-      </header>
+      <Header 
+        variant="simple"
+        showAuth={false}
+        showAdmin={true}
+        showOrders={true}
+      />
 
       <main className="p-6">
         <h1 className="text-2xl font-bold mb-6">주문 내역</h1>
